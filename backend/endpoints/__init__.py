@@ -20,9 +20,10 @@ class Endpoints:
             from models import entities as ent
 
             default_m = "default@gmail.com"
+            default_n = "default"
             default_mgr = ent.Manager.query.filter_by(email=default_m).first()
             if not default_mgr:
-                create_mgr = ent.Manager(email=default_m, password=default_m, contact_at=1010101010)
+                create_mgr = ent.Manager(email=default_m, password=default_m, username=default_n)
                 create_mgr.save()
 
         @app.route("/")

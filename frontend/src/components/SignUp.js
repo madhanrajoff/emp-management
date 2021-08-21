@@ -10,28 +10,49 @@ import {
   Grow,
   TextField,
   FormControlLabel,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Box,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import { ValidatorForm, TextValidator } from "react-material-ui-form-validator";
 
 import axios from "axios";
 
-import { AlertMessage, CircularIndeterminate } from "../elements";
+import {
+  AlertMessage,
+  CircularIndeterminate,
+  CustomizedRatings,
+} from "../elements";
 import { HttpHelper as Http, AlertHelper as AlertHp } from "../helpers";
 import { Logo } from "../assets";
 
 const signUpFormInitialState = {
   email: "",
   password: "",
-  rePassword: "",
+  username: "",
   contact: "",
   hasError: false,
   message: "",
   is_superuser: false,
+  manager: "default",
+  techStack: 2,
 };
 
 class SignUp extends Component {
-  state = { ...signUpFormInitialState, ...AlertHp.initialState };
+  state = { ...signUpFormInitialState, ...AlertHp.initialState, managers: [] };
+
+  componentDidMount = async () => {
+    const { data } = await axios
+      .get(`${Http.Link()}/mgr/`)
+      .then(({ data }) => data);
+    this.setManagers(data);
+  };
+
+  setManagers = (managers) =>
+    this.setState((prevState) => ({ ...prevState, managers }));
 
   onInput = ({ target: { name, value } }) => {
     const { open } = this.state;
@@ -49,9 +70,11 @@ class SignUp extends Component {
     // activate the CircularProgress
     this.setState({ progress: true });
 
+    const { is_superuser } = this.state;
+
     try {
       const { fine, msg, error } = await axios
-        .post(`${Http.Link()}`, this.state, {})
+        .post(`${Http.Link()}/${is_superuser ? "mgr/" : "emp/"}`, this.state)
         .then(({ data }) => data);
 
       if (error) {
@@ -93,14 +116,19 @@ class SignUp extends Component {
     const {
       email,
       password,
-      rePassword,
       contact,
       open,
       msg,
       type,
       progress,
       is_superuser,
+      manager,
+      managers,
+      username,
+      techStack,
     } = this.state;
+
+    console.log("managers", managers);
 
     const openOrClose = (state) => this.setState({ open: state });
 
@@ -113,6 +141,30 @@ class SignUp extends Component {
           </Grow>
           <ValidatorForm className={classes.form} onSubmit={this.onSubmit}>
             <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextValidator
+                  variant="outlined"
+                  required
+                  fullWidth
+                  label="Username"
+                  name="username"
+                  value={username}
+                  onInput={this.onInput}
+                  InputProps={{
+                    classes: {
+                      root: classes.outlinedInput,
+                      focused: classes.focused,
+                      notchedOutline: classes.notchedOutline,
+                    },
+                  }}
+                  InputLabelProps={{
+                    classes: {
+                      root: classes.label,
+                      focused: classes.focused,
+                    },
+                  }}
+                />
+              </Grid>
               <Grid item xs={12}>
                 <TextValidator
                   variant="outlined"
@@ -169,59 +221,42 @@ class SignUp extends Component {
                   }}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  className={classes.password}
-                  variant="outlined"
-                  required
-                  fullWidth
-                  name="rePassword"
-                  label="Re-Password"
-                  type="password"
-                  value={rePassword}
-                  onInput={this.onInput}
-                  InputProps={{
-                    classes: {
-                      root: classes.outlinedInput,
-                      focused: classes.focused,
-                      notchedOutline: classes.notchedOutline,
-                    },
-                  }}
-                  InputLabelProps={{
-                    classes: {
-                      root: classes.label,
-                      focused: classes.focused,
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  className={classes.password}
-                  variant="outlined"
-                  required
-                  fullWidth
-                  name="contact"
-                  label="Contact"
-                  value={contact}
-                  onInput={this.onInput}
-                  InputProps={{
-                    classes: {
-                      root: classes.outlinedInput,
-                      focused: classes.focused,
-                      notchedOutline: classes.notchedOutline,
-                    },
-                  }}
-                  InputLabelProps={{
-                    classes: {
-                      root: classes.label,
-                      focused: classes.focused,
-                    },
-                  }}
-                />
-              </Grid>
+              {!is_superuser && (
+                <>
+                  <Grid item xs={12}>
+                    <FormControl
+                      variant="outlined"
+                      className={classes.formControl}
+                      fullWidth
+                    >
+                      <InputLabel id="elect-outlined-label">
+                        Select your manager...
+                      </InputLabel>
+                      <Select
+                        value={manager}
+                        onChange={this.onInput}
+                        name="manager"
+                        label="Select your manager..."
+                      >
+                        {managers.map(({ id, username }) => (
+                          <MenuItem key={id} value={username}>
+                            {username}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12}>
+                      <CustomizedRatings
+                        value={techStack}
+                        onChange={this.onInput}
+                      />
+                  </Grid>
+                </>
+              )}
               <Grid item xs={12}>
                 <FormControlLabel
+                  className={classes.formControl}
                   control={
                     <Checkbox
                       checked={is_superuser}

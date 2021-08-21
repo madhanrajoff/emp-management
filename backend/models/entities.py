@@ -11,17 +11,24 @@ class Manager(ent._Entity):
         super(Manager,  self).__init__(**kwargs)
 
     @classmethod
-    def get(cls, email):
-        mgr = Manager.query.filter_by(email=email).first()
+    def get(cls, username, ret_dict=False):
+        mgr = Manager.query.filter_by(username=username).first()
         if not mgr:
             return "Manager not exist!"
-        return mgr.to_dict()
+
+        if ret_dict:
+            return mgr.to_dict()
+        return mgr
+
+    @classmethod
+    def get_all(cls):
+        return Manager.query.all()
 
 
 # noinspection PyProtectedMember
 class Employee(ent._Entity):
     id = db.Column(db.Integer, primary_key=True)
-    tech_stack = db.Column(db.JSON, nullable=True)
+    tech_stack = db.Column(db.Integer, nullable=True)
     manager_id = db.Column(db.Integer, db.ForeignKey('manager.id'),
                            nullable=False)
 

@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
   },
   progress: {
-    color: "#bf360c",
+    color: "orange",
   },
 }));
 

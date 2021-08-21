@@ -1,6 +1,7 @@
 from os import environ
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 
 def generate_db_uri() -> str:
@@ -15,3 +16,4 @@ def generate_db_uri() -> str:
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = generate_db_uri()
 db = SQLAlchemy(app)
+CORS(app)
