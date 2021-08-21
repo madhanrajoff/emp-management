@@ -8,8 +8,4 @@ In the project directory, you can run:
 
 ### `Required ENV` 
 
-DB_HOST=<HOST>
-DB_USER=<USER>
-DB_PASS=<PASS>
-DB_NAME=<DB_NAME>
-DB_TYPE=<MYSQL OR POSTGRESQL>
+#### `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME`
