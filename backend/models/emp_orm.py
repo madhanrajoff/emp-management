@@ -1,15 +1,32 @@
 from . import *
 
+# Password Hash
+bcrypt = Bcrypt()
+
 
 class _Entity(db.Model):
     __abstract__ = True
+
+    email = db.Column(db.String(120), nullable=False)
+    password = db.Column(db.String(120), nullable=False)
 
     contact_at = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.text("CURRENT_TIMESTAMP"))
     updated_at = db.Column(db.DateTime, nullable=False,
                            server_default=db.text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
 
-    def dbve(self):
+    @validates("password")
+    def validate_password(self, key, password):
+        return bcrypt.generate_password_hash(password).decode('utf-8')
+
+    @validates("email")
+    def validate_email(self, key, email):
+        if not re.match("[^@]+@[^@]+\.[^@]+", email):
+            raise AssertionError('Provided email is not an email address')
+
+        return email
+
+    def save(self):
         try:
             db.session.add(self)
             db.session.commit()
