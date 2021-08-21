@@ -1,3 +1,5 @@
+## Available Scripts
+
 In the project directory, you can run:
 
 ### `python3 -m venv venv`
