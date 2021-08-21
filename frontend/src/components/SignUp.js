@@ -14,7 +14,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Box,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import { ValidatorForm, TextValidator } from "react-material-ui-form-validator";
@@ -34,11 +33,9 @@ const signUpFormInitialState = {
   password: "",
   username: "",
   contact: "",
-  hasError: false,
-  message: "",
   is_superuser: false,
   manager: "default",
-  techStack: 2,
+  tech_stack: 2,
 };
 
 class SignUp extends Component {
@@ -49,6 +46,15 @@ class SignUp extends Component {
       .get(`${Http.Link()}/mgr/`)
       .then(({ data }) => data);
     this.setManagers(data);
+
+    const { managerId } = this.props;
+    if (
+      this.state.managers.length > 0 &&
+      managerId !== undefined &&
+      this.state.manager === "default"
+    ) {
+      this.setState({ manager: this.findManager(managerId).username });
+    }
   };
 
   setManagers = (managers) =>
@@ -71,36 +77,31 @@ class SignUp extends Component {
     this.setState({ progress: true });
 
     const { is_superuser } = this.state;
+    const { managerId } = this.props;
 
-    try {
-      const { fine, msg, error } = await axios
-        .post(`${Http.Link()}/${is_superuser ? "mgr/" : "emp/"}`, this.state)
-        .then(({ data }) => data);
+    const { fine, msg } = await axios
+      .post(`${Http.Link()}/${is_superuser ? "mgr/" : "emp/"}`, this.state)
+      .then(({ data }) => data);
 
-      if (error) {
-        const { message } = error;
-        this.setState({ hasError: true, message });
+    if (!fine) {
+      this.setState({
+        msg: msg,
+        type: "error",
+        progress: false, // deActivate the CircularProgress and Open Alert.
+        open: true,
+      });
+    } else {
+      if (managerId !== undefined) {
+        window.location.reload();
       } else {
-        if (!fine) {
-          this.setState({
-            msg: msg,
-            type: "error",
-            progress: false, // deActivate the CircularProgress and Open Alert.
-            open: true,
-          });
-        } else {
-          this.setState({
-            progress: false,
-            open: true,
-            msg: "You have successfully registered",
-            type: "success",
-            ...signUpFormInitialState,
-          });
-        }
+        this.setState({
+          progress: false,
+          open: true,
+          msg: "You have successfully registered",
+          type: "success",
+          ...signUpFormInitialState,
+        });
       }
-    } catch (error) {
-      const { message } = error;
-      this.setState({ hasError: true, message });
     }
   };
 
@@ -110,13 +111,17 @@ class SignUp extends Component {
       ...AlertHp.initialState,
     }));
 
+  findManager = (id) => {
+    const { managers } = this.state;
+    return managers.find(({ id: row_id }) => row_id === parseInt(id));
+  };
+
   render() {
-    const { classes } = this.props;
+    const { classes, managerId } = this.props;
 
     const {
       email,
       password,
-      contact,
       open,
       msg,
       type,
@@ -125,10 +130,8 @@ class SignUp extends Component {
       manager,
       managers,
       username,
-      techStack,
+      tech_stack,
     } = this.state;
-
-    console.log("managers", managers);
 
     const openOrClose = (state) => this.setState({ open: state });
 
@@ -237,6 +240,7 @@ class SignUp extends Component {
                         onChange={this.onInput}
                         name="manager"
                         label="Select your manager..."
+                        disabled={managerId ? true : false}
                       >
                         {managers.map(({ id, username }) => (
                           <MenuItem key={id} value={username}>
@@ -247,32 +251,34 @@ class SignUp extends Component {
                     </FormControl>
                   </Grid>
                   <Grid item xs={12}>
-                      <CustomizedRatings
-                        value={techStack}
-                        onChange={this.onInput}
-                      />
+                    <CustomizedRatings
+                      value={tech_stack}
+                      onChange={this.onInput}
+                    />
                   </Grid>
                 </>
               )}
-              <Grid item xs={12}>
-                <FormControlLabel
-                  className={classes.formControl}
-                  control={
-                    <Checkbox
-                      checked={is_superuser}
-                      color="primary"
-                      onInput={() =>
-                        this.setState({ is_superuser: !is_superuser })
-                      }
-                    />
-                  }
-                  label={
-                    <Typography variant="overline" display="block">
-                      manager?
-                    </Typography>
-                  }
-                />
-              </Grid>
+              {!managerId && (
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    className={classes.formControl}
+                    control={
+                      <Checkbox
+                        checked={is_superuser}
+                        color="primary"
+                        onInput={() =>
+                          this.setState({ is_superuser: !is_superuser })
+                        }
+                      />
+                    }
+                    label={
+                      <Typography variant="overline" display="block">
+                        manager?
+                      </Typography>
+                    }
+                  />
+                </Grid>
+              )}
             </Grid>
             {progress ? (
               <CircularIndeterminate />
@@ -293,13 +299,24 @@ class SignUp extends Component {
             >
               Sign Up
             </Button>
-            <Grid container justify="flex-end">
-              <Grid item>
-                <Link className={classes.link} href="/" variant="body2">
-                  Already have an account? Sign in
-                </Link>
+            {!managerId ? (
+              <Grid container justify="flex-end">
+                <Grid item>
+                  <Link className={classes.link} href="/" variant="body2">
+                    Already have an account? Sign in
+                  </Link>
+                </Grid>
               </Grid>
-            </Grid>
+            ) : (
+              <Button
+                fullWidth
+                variant="contained"
+                className={classes.cancel}
+                onClick={() => window.location.reload()}
+              >
+                cancel
+              </Button>
+            )}
           </ValidatorForm>
         </div>
       </Container>
@@ -350,6 +367,10 @@ const useStyles = (theme) => ({
   },
   logo: {
     height: 70,
+  },
+  cancel: {
+    backgroundColor: "#800000",
+    color: "white",
   },
 });
 

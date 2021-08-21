@@ -7,6 +7,10 @@ import {
   Grid,
   Link,
   TextField,
+  FormControlLabel,
+  Checkbox,
+  Typography,
+  Box,
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -15,12 +19,14 @@ import axios from "axios";
 import { AlertMessage, CircularIndeterminate } from "../elements";
 import { HttpHelper as Http, AlertHelper as AlertHp } from "../helpers";
 import { Logo } from "../assets";
+import { History } from "../utils";
 
 const signInFormInitialState = {
   email: "",
   password: "",
   hasError: false,
   message: "",
+  is_superuser: false,
 };
 
 class SignIn extends Component {
@@ -42,31 +48,23 @@ class SignIn extends Component {
     // activate the CircularProgress.
     this.setState({ progress: true });
 
-    try {
-      const { fine, msg, error } = await axios
-        .get(`${Http.Link()}/verify`, {
-          params: this.state,
-        })
-        .then(({ data }) => data);
+    const { is_superuser } = this.state;
 
-      if (error) {
-        const { message } = error;
-        this.setState({ hasError: true, message });
-      } else {
-        if (!fine) {
-          this.setState({
-            msg,
-            type: "error",
-            progress: false, // deActivate the CircularProgress and Open Alert.
-            open: true,
-          });
-        } else {
-          History.push("/home");
-        }
-      }
-    } catch (error) {
-      const { message } = error;
-      this.setState({ hasError: true, message });
+    const { fine, msg, data } = await axios
+      .get(`${Http.Link()}/${is_superuser ? "mgr/" : "emp/"}`, {
+        params: this.state,
+      })
+      .then(({ data }) => data);
+
+    if (!fine) {
+      this.setState({
+        msg,
+        type: "error",
+        progress: false, // deActivate the CircularProgress and Open Alert.
+        open: true,
+      });
+    } else {
+      History.push(`/home/${is_superuser ? "mgr/" : "emp/"}${data.id}`);
     }
   };
 
@@ -80,7 +78,7 @@ class SignIn extends Component {
 
   render() {
     const { classes } = this.props;
-    const { email, password, open, msg, type, progress } =
+    const { email, password, open, msg, type, progress, is_superuser } =
       this.state;
     return (
       <Container component="main" maxWidth="xs">
@@ -139,6 +137,24 @@ class SignIn extends Component {
                 },
               }}
             />
+            <Box mt={1}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={is_superuser}
+                    color="primary"
+                    onInput={() =>
+                      this.setState({ is_superuser: !is_superuser })
+                    }
+                  />
+                }
+                label={
+                  <Typography variant="overline" display="block">
+                    manager?
+                  </Typography>
+                }
+              />
+            </Box>
             {progress ? (
               <CircularIndeterminate />
             ) : (

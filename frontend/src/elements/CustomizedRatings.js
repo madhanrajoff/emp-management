@@ -50,7 +50,7 @@ export default function CustomizedRatings({ value, onChange }) {
         </Box>
         <Box>
           <Rating
-            name="techStack"
+            name="tech_stack"
             defaultValue={2}
             value={value}
             getLabelText={(value) => customIcons[value].label}

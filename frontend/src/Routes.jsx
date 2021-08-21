@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { Router, Switch, Route } from "react-router-dom";
 
-import { SignIn, SignUp } from "../src/components";
+import { SignIn, SignUp, Home } from "../src/components";
 import { History } from "./utils";
 
 class Routes extends Component {
@@ -12,6 +12,7 @@ class Routes extends Component {
           <Switch>
             <Route exact path="/" component={SignIn} />
             <Route exact path="/sign-up" component={SignUp} />
+            <Route exact path="/home/:who/:id" component={Home} />
           </Switch>
         </Router>
       </Fragment>

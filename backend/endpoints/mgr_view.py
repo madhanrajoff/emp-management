@@ -6,11 +6,14 @@ from models import entities as ent
 
 class MGRView(FlaskView):
     def index(self):
-        req = request.json
+        req = request.args
         if req:
             email = req.get("email")
-            return ent.Manager.get(email, ret_dict=True)
-        return {"data": [data.to_dict() for data in ent.Manager.get_all()]}
+            return ent.Manager.get_by_email(email=email, ret_dict=True)
+        return ent.Manager.get_all(ret_dict=True)
+
+    def get(self, id):
+        return ent.Manager.get_by_id(id, ret_dict=True)
 
     def post(self):
         req = request.json
