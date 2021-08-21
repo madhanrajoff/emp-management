@@ -10,6 +10,13 @@ class Manager(ent._Entity):
     def __init__(self, **kwargs):
         super(Manager,  self).__init__(**kwargs)
 
+    @classmethod
+    def get(cls, email):
+        mgr = Manager.query.filter_by(email=email).first()
+        if not mgr:
+            return "Manager not exist!"
+        return mgr.to_dict()
+
 
 # noinspection PyProtectedMember
 class Employee(ent._Entity):

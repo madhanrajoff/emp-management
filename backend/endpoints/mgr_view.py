@@ -1,21 +1,28 @@
 from . import *
-from flask_classful import FlaskView, route
+from flask_classful import FlaskView
 from models import entities as ent
 
 
 class MGRView(FlaskView):
     def index(self):
-        return "Hello Manager!"
+        req = request.args
+        email = req.get("email")
+        if not email:
+            return "Hello Manager!"
+
+        return ent.Manager.get(email)
 
     def post(self):
         req = request.args
         email = req.get("email")
         password = req.get("password")
         contact = req.get("contact")
-        print(email, password, contact)
-        if not any([email, password, contact]):
-            print("valid")
+        if not email or not password or not contact:
             return "Required Fields are missing..."
 
-        # mgr = ent.Manager(email=email, password=password, contact_at=contact).save()
-        # return mgr.to_dict()
+        try:
+            mgr = ent.Manager(email=email, password=password, contact_at=contact).save()
+        except exc.IntegrityError:
+            return "Email already chosen!"
+
+        return mgr.to_dict()

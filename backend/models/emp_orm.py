@@ -7,7 +7,7 @@ bcrypt = Bcrypt()
 class _Entity(db.Model):
     __abstract__ = True
 
-    email = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
     password = db.Column(db.String(120), nullable=False)
 
     contact_at = db.Column(db.Integer, nullable=False)
@@ -30,6 +30,7 @@ class _Entity(db.Model):
         try:
             db.session.add(self)
             db.session.commit()
+            db.session.refresh(self)
             return self
         except Exception as e:
             db.session.rollback()
