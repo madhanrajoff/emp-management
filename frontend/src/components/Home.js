@@ -52,6 +52,11 @@ class Home extends Component {
     if (data !== undefined) {
       this.setRows(Array.isArray(data) ? data : [data]);
       this.setTableInitialState();
+    } else {
+      this.setState((prevState) => ({
+        ...prevState,
+        ...tableInitialState,
+      }));
     }
   };
 
@@ -282,6 +287,8 @@ class Home extends Component {
       const { fine } = await axios
         .delete(`${Http.Link()}/emp/${previous.id}/`)
         .then(({ data }) => data);
+
+      console.log(fine);
       if (fine) {
         this.callForRows();
       }
@@ -294,6 +301,14 @@ class Home extends Component {
   render() {
     const { classes, match } = this.props;
     const { rows, addNew } = this.state;
+
+    const percentage = {
+      1: "20%",
+      2: "40%",
+      3: "60%",
+      4: "80%",
+      5: "100%",
+    };
 
     const columns = [
       { id: "username", label: "Username" },
@@ -375,7 +390,9 @@ class Home extends Component {
                       <TableCell align="left">{row.email}</TableCell>
                       <TableCell align="left">{row.created_at}</TableCell>
                       <TableCell align="left">{row.updated_at}</TableCell>
-                      <TableCell align="left">{row.tech_stack}</TableCell>
+                      <TableCell align="left">
+                        {percentage[row.tech_stack]}
+                      </TableCell>
                       <TableCell
                         align="right"
                         className={classes.selectTableCell}
@@ -414,7 +431,7 @@ class Home extends Component {
           </Slide>
         ) : (
           <Box display="flex" justifyContent="center">
-            <Typography variant="h3">No Employees found!</Typography>
+            <Typography variant="h4">No Employees found!</Typography>
           </Box>
         )}
         {this.editDialog()}
