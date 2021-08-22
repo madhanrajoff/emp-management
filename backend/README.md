@@ -11,3 +11,6 @@ In the project directory, you can run:
 ### Required ENV 
 
 #### `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME`
+
+### To Start Application `python3 main.py`
+

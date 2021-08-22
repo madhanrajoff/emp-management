@@ -14,4 +14,4 @@ You will also see any lint errors in the console.
 
 ### Required ENV
 
-#### `REACT_APP_HTTP_LINK`
+#### `REACT_APP_HTTP_LINK` Backend URL EX: `http://127.0.0.1:5000`
